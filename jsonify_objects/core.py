@@ -4,9 +4,8 @@ from enum import Enum
 from typing import Any
 
 
-def stringify_structures(
+def jsonify_objects(
     input_data: Any,
-    indent: int = 2,
     serialize_objects: bool = False,
 ) -> str:
     """Convert any data with non-serializable objects to a formatted JSON
@@ -78,7 +77,18 @@ def stringify_structures(
         else:
             return _to_str(current)
 
-    return json.dumps(_recurse(input_data), indent=indent)
+    return _recurse(input_data)
+
+
+def dumps(
+    input_data: Any,
+    serialize_objects: bool = False,
+    indent: int = 2,
+):
+    return json.dumps(
+        jsonify_objects(input_data),
+        indent=indent,
+    )
 
 
 # Tests
@@ -108,61 +118,61 @@ class Person:
 
 
 # Primitives
-assert stringify_structures(42) == '"42"'
-assert stringify_structures(3.14) == '"3.14"'
-assert stringify_structures("hello") == '"hello"'
-assert stringify_structures(True) == '"true"'
-assert stringify_structures(False) == '"false"'
-assert stringify_structures(None) == "null"
+assert dumps(42) == '"42"'
+assert dumps(3.14) == '"3.14"'
+assert dumps("hello") == '"hello"'
+assert dumps(True) == '"true"'
+assert dumps(False) == '"false"'
+assert dumps(None) == "null"
 
 # Empty containers
-assert stringify_structures({}) == "{}"
-assert stringify_structures([]) == "[]"
+assert dumps({}) == "{}"
+assert dumps([]) == "[]"
 
 # Simple dict
-result = stringify_structures({"a": 1, "b": 2})
+result = dumps({"a": 1, "b": 2})
 assert '"a": "1"' in result
 assert '"b": "2"' in result
 
 # Nested dict
-result = stringify_structures({"outer": {"inner": 1}})
+result = dumps({"outer": {"inner": 1}})
 assert '"outer": {' in result
 assert '"inner": "1"' in result
 
 # List of dicts
-result = stringify_structures([{"a": 1}, {"b": 2}])
+result = dumps([{"a": 1}, {"b": 2}])
 assert '"a": "1"' in result
 assert '"b": "2"' in result
 
 # List of primitives
-result = stringify_structures([1, 2, 3])
+result = dumps([1, 2, 3])
 assert '"1"' in result
 assert '"2"' in result
 assert '"3"' in result
 
 # Mixed nested
-result = stringify_structures({"list": [1, {"x": 2}], "y": 3})
+result = dumps({"list": [1, {"x": 2}], "y": 3})
 assert '"list":' in result
 assert '"x": "2"' in result
 
 # None in dict
-result = stringify_structures({"a": None})
+result = dumps({"a": None})
 assert '"a": null' in result
 
 # None in list
-result = stringify_structures([None, 1, 2])
+result = dumps([None, 1, 2])
 assert "null" in result
 
 # Enum
-result = stringify_structures({"color": Color.RED})
+result = dumps({"color": Color.RED})
 assert '"color": "red"' in result
 
 # Object fallback to repr
-result = stringify_structures({"user": User("Alice", 30)})
+result = dumps({"user": User("Alice", 30)})
 assert "User('Alice', 30)" in result
 
 # serialize_objects=True with nested object
-result = stringify_structures(
+result = dumps(
     {"person": Person("Bob", Address("NYC"))}, serialize_objects=True
 )
 assert '"name": "Bob"' in result
@@ -174,34 +184,34 @@ class NoDict:
     pass
 
 
-result = stringify_structures({"weird": NoDict()}, serialize_objects=True)
+result = dumps({"weird": NoDict()}, serialize_objects=True)
 print(result)
 assert "NoDict" in result
 
 # Tuple (converted to list by json.dumps)
-result = stringify_structures((1, 2, 3))
+result = dumps((1, 2, 3))
 assert "1" in result
 
 # Deeply nested
-result = stringify_structures({"a": {"b": {"c": {"d": 1}}}})
+result = dumps({"a": {"b": {"c": {"d": 1}}}})
 assert '"d": "1"' in result
 
 # Special characters in string
-result = stringify_structures({"text": "hello\nworld"})
+result = dumps({"text": "hello\nworld"})
 assert "hello\\nworld" in result
 
 # Empty string
-result = stringify_structures({"empty": ""})
+result = dumps({"empty": ""})
 assert '"empty": ""' in result
 
 # Negative numbers
-assert stringify_structures(-42) == '"-42"'
+assert dumps(-42) == '"-42"'
 
 # Scientific notation
-assert stringify_structures(1e10) == '"10000000000.0"'
+assert dumps(1e10) == '"10000000000.0"'
 
 # Custom indent
-result = stringify_structures({"a": 1}, indent=4)
+result = dumps({"a": 1}, indent=4)
 assert "    " in result
 
 from dataclasses import dataclass
@@ -226,25 +236,25 @@ class Address:
 
 
 # Dataclass without serialize_objects (falls back to repr)
-result = stringify_structures({"user": User("Alice", 30)})
+result = dumps({"user": User("Alice", 30)})
 print(result)
 
 # Dataclass with serialize_objects=True
-result = stringify_structures(
+result = dumps(
     {"user": User("Alice", 30)},
     serialize_objects=True,
 )
 print(result)
 
 # Nested dataclasses
-result = stringify_structures(
+result = dumps(
     {"person": Person("Bob", Address("NYC", "10001"))},
     serialize_objects=True,
 )
 print(result)
 
 # List of dataclasses
-result = stringify_structures(
+result = dumps(
     {"users": [User("A", 1), User("B", 2)]},
     serialize_objects=True,
 )
