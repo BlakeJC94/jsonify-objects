@@ -84,6 +84,9 @@ def dumps(
     indent: int = 2,
 ):
     return json.dumps(
-        jsonify_objects(input_data),
+        jsonify_objects(
+            input_data,
+            serialize_objects=serialize_objects,
+        ),
         indent=indent,
     )
