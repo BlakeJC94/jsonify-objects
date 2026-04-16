@@ -35,20 +35,23 @@ def jsonify_objects(
                 return result
         raise TypeError(f"Cannot convert {type(obj)} to dict")
 
-    def _recurse(current: Any) -> Any:
+    def _recurse(current: Any, from_dataclass: bool = False) -> Any:
         if current is None:
             return None
         if is_dataclass(current):
+            # AIDEV-NOTE: asdict flattens nested dataclasses; from_dataclass
+            # ensures numeric fields keep their native JSON types downstream
             current = asdict(current)
+            from_dataclass = True
         if isinstance(current, dict):
             result = {}
             for k, v in current.items():
                 if v is None:
                     result[k] = None
                 elif isinstance(v, dict):
-                    result[k] = _recurse(v)
+                    result[k] = _recurse(v, from_dataclass)
                 elif isinstance(v, list):
-                    result[k] = [_recurse(item) for item in v]
+                    result[k] = [_recurse(item, from_dataclass) for item in v]
                 elif serialize_objects and not isinstance(
                     v,
                     (
@@ -63,15 +66,24 @@ def jsonify_objects(
                         type(None),
                     ),
                 ):
-                    try:
-                        result[k] = _recurse(_to_dict(v))
-                    except TypeError:
-                        result[k] = _to_str(v)
+                    # recurse directly so is_dataclass check fires if needed;
+                    # True preserves numeric types from expanded object fields
+                    result[k] = _recurse(v, True)
+                elif from_dataclass and isinstance(v, (int, float, bool)):
+                    result[k] = v
                 else:
                     result[k] = _to_str(v)
             return result
         elif isinstance(current, list):
-            return [_recurse(item) for item in current]
+            return [_recurse(item, from_dataclass) for item in current]
+        elif serialize_objects and not isinstance(
+            current,
+            (str, int, float, bool, Enum, type(None)),
+        ):
+            try:
+                return _recurse(_to_dict(current), True)
+            except TypeError:
+                return _to_str(current)
         else:
             return _to_str(current)
 
