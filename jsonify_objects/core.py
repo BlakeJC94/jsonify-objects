@@ -7,10 +7,8 @@ from typing import Any
 def jsonify_objects(
     input_data: Any,
     serialize_objects: bool = False,
-) -> str:
-    """Convert any data with non-serializable objects to a formatted JSON
-    string.
-    """
+) -> dict[str, Any]:
+    """Convert any data with to a dict"""
 
     def _to_str(val: Any) -> str:
         if isinstance(val, Enum):
