@@ -10,7 +10,7 @@ def jsonify_objects(
 ) -> dict[str, Any]:
     """Convert any data with to a dict"""
 
-    def _to_str(val: Any) -> str:
+    def _to_str(val: Any) -> str:  # noqa: PLR0911 (too many returns)
         if isinstance(val, Enum):
             return str(val.value)
         elif isinstance(val, bool):
@@ -35,7 +35,10 @@ def jsonify_objects(
                 return result
         raise TypeError(f"Cannot convert {type(obj)} to dict")
 
-    def _recurse(current: Any, from_dataclass: bool = False) -> Any:
+    def _recurse(  # noqa: PLR0912 (too many branches)
+        current: Any,
+        from_dataclass: bool = False,
+    ) -> Any:
         if current is None:
             return None
         if is_dataclass(current):
