@@ -16,7 +16,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
 
       - name: Install dev dependencies
-        run: uv sync --frozen --group dev
+        run: uv sync --frozen
 
       - name: Format with ruff
         run: uv run ruff format --check
