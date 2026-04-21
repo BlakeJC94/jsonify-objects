@@ -3,10 +3,12 @@ name = "jsonify_objects"
 version = "1.0.0"
 description = "Stdlib function to jsonify almost any Python object recursively"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = []
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
+    "ruff>=0.15.11",
+    "ty>=0.0.32",
 ]
