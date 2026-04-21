@@ -43,13 +43,13 @@ class UserDataclass:
 @dataclass
 class AddressDataclass:
     city: str
-    zip_code: int
+    zip_code: str
 
 
 @dataclass
 class PersonDataclass:
     name: str
-    address: Address
+    address: AddressDataclass
 
 
 # Primitives
