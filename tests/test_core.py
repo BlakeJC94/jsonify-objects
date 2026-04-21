@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import pytest
+
 from jsonify_objects import dumps
 
 
@@ -136,7 +137,8 @@ def test_no_serialize_repr_fallback():
 
 def test_serialize_nested_object():
     result = dumps(
-        {"person": Person("Bob", Address("NYC"))}, serialize_objects=True
+        {"person": Person("Bob", Address("NYC"))},
+        serialize_objects=True,
     )
     assert '"name": "Bob"' in result
     assert '"city": "NYC"' in result

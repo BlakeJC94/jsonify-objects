@@ -6,6 +6,14 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
+[tool.ruff]
+fix = true
+line-length = 80
+exclude = [".venv", ".git"]
+
+[tool.ruff.lint]
+select = ["E", "F", "PL", "I"]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
